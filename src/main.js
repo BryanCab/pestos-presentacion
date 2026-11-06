@@ -380,8 +380,8 @@ $$(".paso").forEach((p, i) => {
 /* ───────────────────────── documentos: abanico y visor ───────────────────────── */
 {
   const DOCS = {
-    reporte: { titulo: "Reporte ejecutivo · Casa Agave", total: datos.paginas.reporte, muestra: [1, 3, 5, 6, 8, 9], pdf: "pdf/reporte-ejemplo.pdf" },
-    constancia: { titulo: "Constancia de servicio · Casa Agave", total: datos.paginas.constancia, muestra: [1, 2, 3, 4], pdf: "pdf/constancia-ejemplo.pdf" },
+    reporte: { titulo: "Reporte ejecutivo · Casa Agave", total: datos.paginas.reporte, muestra: [1, 3, 5, 6, 8, 9], pdf: "pdf/reporte-casa-agave.pdf" },
+    constancia: { titulo: "Constancia de servicio · Casa Agave", total: datos.paginas.constancia, muestra: [1, 2, 3, 4], pdf: "pdf/constancia-casa-agave.pdf" },
   };
   const ab = $("#abanico");
   let doc = "reporte", hojas = [], spread = reducir ? 1 : 0.15;
