@@ -1,0 +1,540 @@
+export default {
+ "w": 1600,
+ "h": 1000,
+ "estaciones": [
+  {
+   "cod": "R01",
+   "tipo": "cebadero_roedores",
+   "grupo": "cebaderos",
+   "ubic": "Cocina, puerta de servicio",
+   "x": 4.38,
+   "y": 21.0,
+   "serie": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "cod": "R02",
+   "tipo": "cebadero_roedores",
+   "grupo": "cebaderos",
+   "ubic": "Bodega seca, pasillo central",
+   "x": 10.94,
+   "y": 73.0,
+   "serie": [
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "R03",
+   "tipo": "cebadero_roedores",
+   "grupo": "cebaderos",
+   "ubic": "Bodega seca, andén de descarga",
+   "x": 4.38,
+   "y": 90.5,
+   "serie": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "R04",
+   "tipo": "cebadero_roedores",
+   "grupo": "cebaderos",
+   "ubic": "Cámara fría, acceso",
+   "x": 24.69,
+   "y": 58.5,
+   "serie": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "R05",
+   "tipo": "cebadero_roedores",
+   "grupo": "cebaderos",
+   "ubic": "Terraza, jardinera sur",
+   "x": 93.75,
+   "y": 90.5,
+   "serie": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "R06",
+   "tipo": "cebadero_roedores",
+   "grupo": "cebaderos",
+   "ubic": "Perímetro exterior, contenedores",
+   "x": 30.0,
+   "y": 97.5,
+   "serie": [
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "T01",
+   "tipo": "trampa_mecanica",
+   "grupo": "mecanicas",
+   "ubic": "Cocina, base de las estufas",
+   "x": 11.88,
+   "y": 13.8,
+   "serie": [
+    2,
+    3,
+    1,
+    2,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "T02",
+   "tipo": "trampa_mecanica",
+   "grupo": "mecanicas",
+   "ubic": "Cocina, bajo mesa de preparación",
+   "x": 20.62,
+   "y": 34.5,
+   "serie": [
+    3,
+    2,
+    2,
+    1,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "T03",
+   "tipo": "trampa_mecanica",
+   "grupo": "mecanicas",
+   "ubic": "Pasillo de servicio",
+   "x": 35.31,
+   "y": 52.0,
+   "serie": [
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "cod": "T04",
+   "tipo": "trampa_mecanica",
+   "grupo": "mecanicas",
+   "ubic": "Baños, ducto sanitario",
+   "x": 29.38,
+   "y": 88.0,
+   "serie": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "T05",
+   "tipo": "trampa_mecanica",
+   "grupo": "mecanicas",
+   "ubic": "Bodega seca, esquina norte",
+   "x": 4.38,
+   "y": 56.0,
+   "serie": [
+    1,
+    0,
+    2,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "cod": "F01",
+   "tipo": "trampa_feromona",
+   "grupo": "feromona",
+   "ubic": "Bodega seca, anaqueles de granos",
+   "x": 15.62,
+   "y": 66.0,
+   "serie": [
+    14,
+    17,
+    21,
+    19,
+    16,
+    15,
+    13,
+    12,
+    11,
+    9,
+    8
+   ]
+  },
+  {
+   "cod": "F02",
+   "tipo": "trampa_feromona",
+   "grupo": "feromona",
+   "ubic": "Cocina, despensa de harinas",
+   "x": 6.56,
+   "y": 44.0,
+   "serie": [
+    6,
+    8,
+    9,
+    7,
+    6,
+    5,
+    5,
+    4,
+    3,
+    3,
+    2
+   ]
+  },
+  {
+   "cod": "F03",
+   "tipo": "trampa_feromona",
+   "grupo": "feromona",
+   "ubic": "Barra, almacén de bebidas",
+   "x": 56.56,
+   "y": 11.5,
+   "serie": [
+    3,
+    2,
+    4,
+    3,
+    2,
+    2,
+    1,
+    1,
+    0,
+    1,
+    0
+   ]
+  },
+  {
+   "cod": "L01",
+   "tipo": "trampa_uv",
+   "grupo": "uv",
+   "ubic": "Cocina, sobre la línea caliente",
+   "x": 18.75,
+   "y": 6.0,
+   "serie": [
+    52,
+    61,
+    58,
+    70,
+    66,
+    59,
+    48,
+    44,
+    41,
+    38,
+    35
+   ]
+  },
+  {
+   "cod": "L02",
+   "tipo": "trampa_uv",
+   "grupo": "uv",
+   "ubic": "Acceso a cocina desde comedor",
+   "x": 35.0,
+   "y": 33.0,
+   "serie": [
+    18,
+    22,
+    20,
+    25,
+    23,
+    19,
+    15,
+    14,
+    12,
+    11,
+    9
+   ]
+  },
+  {
+   "cod": "L03",
+   "tipo": "trampa_uv",
+   "grupo": "uv",
+   "ubic": "Comedor, junto a ventanales",
+   "x": 70.62,
+   "y": 7.0,
+   "serie": [
+    9,
+    12,
+    14,
+    18,
+    22,
+    26,
+    24,
+    20,
+    18,
+    16,
+    14
+   ]
+  },
+  {
+   "cod": "L04",
+   "tipo": "trampa_uv",
+   "grupo": "uv",
+   "ubic": "Terraza, acceso",
+   "x": 83.12,
+   "y": 52.0,
+   "serie": [
+    30,
+    38,
+    45,
+    52,
+    58,
+    49,
+    40,
+    33,
+    27,
+    22,
+    19
+   ]
+  },
+  {
+   "cod": "O01",
+   "tipo": "otro",
+   "grupo": "otros",
+   "ubic": "Cuarto de basura, estación de monitoreo",
+   "x": 3.75,
+   "y": 98.5,
+   "serie": [
+    12,
+    15,
+    14,
+    16,
+    18,
+    15,
+    12,
+    10,
+    9,
+    7,
+    6
+   ]
+  },
+  {
+   "cod": "O02",
+   "tipo": "otro",
+   "grupo": "otros",
+   "ubic": "Barra, nodo de monitoreo",
+   "x": 62.5,
+   "y": 33.0,
+   "serie": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ ],
+ "fechas": [
+  "19 jun",
+  "3 jul",
+  "17 jul",
+  "31 jul",
+  "14 ago",
+  "28 ago",
+  "11 sep",
+  "25 sep",
+  "9 oct",
+  "23 oct",
+  "6 nov"
+ ],
+ "capturas": {
+  "mecanicas": [
+   6,
+   6,
+   5,
+   4,
+   2,
+   1,
+   0,
+   1,
+   0,
+   0,
+   1
+  ],
+  "feromona": [
+   23,
+   27,
+   34,
+   29,
+   24,
+   22,
+   19,
+   17,
+   14,
+   13,
+   10
+  ],
+  "uv": [
+   109,
+   133,
+   137,
+   165,
+   169,
+   153,
+   127,
+   111,
+   98,
+   87,
+   77
+  ],
+  "otros": [
+   12,
+   15,
+   14,
+   16,
+   18,
+   15,
+   12,
+   10,
+   9,
+   7,
+   6
+  ]
+ },
+ "consumo": {
+  "gel": [
+   30,
+   40,
+   45,
+   35,
+   30,
+   25,
+   25,
+   20,
+   20,
+   15,
+   15
+  ],
+  "residual": [
+   180,
+   0,
+   55,
+   140,
+   50,
+   0,
+   145,
+   0,
+   45,
+   90,
+   45
+  ],
+  "hormigas": [
+   0,
+   0,
+   0,
+   0,
+   12,
+   15,
+   0,
+   0,
+   10,
+   0,
+   10
+  ]
+ },
+ "paginas": {
+  "reporte": 10,
+  "constancia": 4
+ },
+ "visitas": 11,
+ "whatsapp": "528141540510"
+};

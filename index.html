@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PestOS · Software para empresas de control de plagas</title>
+<meta name="description" content="Agenda, reporte de 6 pasos desde el celular, constancias verificables con QR y reportes ejecutivos con mapa de calor. Con o sin internet.">
+<meta name="theme-color" content="#05060c">
+<meta property="og:url" content="https://bryancab.github.io/pestos-presentacion/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:title" content="PestOS · Tu operación de control de plagas en un solo mapa">
+<meta property="og:description" content="Reporte en campo, constancia con QR y reporte ejecutivo con gráficas. Con o sin internet.">
+<meta property="og:image" content="https://bryancab.github.io/pestos-presentacion/img/og.jpg">
+<script>document.documentElement.className+=" js"</script>
+<link rel="icon" href="img/pestos_logo.webp" type="image/webp">
+<link rel="stylesheet" href="vendor/driver.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="progreso" id="progreso"></div>
+<div class="cursor-glow" id="cursor"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="fondo-estatico" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="marca" href="#hero" aria-label="PestOS, inicio">
+    <img src="img/pestos_logo.webp" alt="" width="34" height="34"><span>Pest<b>OS</b></span>
+  </a>
+  <nav class="nav-links" aria-label="Secciones">
+    <a href="#flujo">Cómo funciona</a>
+    <a href="#documentos">Documentos</a>
+    <a href="#plano">Plano</a>
+    <a href="#planes">Planes</a>
+  </nav>
+  <div class="nav-acc">
+    <button class="btn btn-ghost btn-sm" id="tour-btn" type="button"><span class="play">▶</span> Recorrido guiado</button>
+    <a class="btn btn-wa btn-sm" data-wa data-msg="Hola, quiero conocer PestOS" href="#contacto">WhatsApp</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ═══════════ PORTADA ═══════════ -->
+<section class="sec hero" id="hero" data-k="hero">
+  <div class="hero-in">
+    <p class="chip" data-r><i class="dot"></i> Software para empresas de control de plagas</p>
+    <h1 data-split>Tu operación de fumigación, en un solo mapa.</h1>
+    <p class="lead" data-r>
+      Agenda, reporte de 6 pasos desde el celular, constancia con QR verificable y un reporte ejecutivo
+      con mapa de calor. Funciona <strong>con o sin internet</strong>.
+    </p>
+    <div class="hero-cta" data-r>
+      <a class="btn btn-wa btn-lg" data-wa data-msg="Hola, quiero ver una demo de PestOS" href="#contacto">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.8-1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.8-.1 1.4Z"/></svg>
+        Pedir una demo
+      </a>
+      <button class="btn btn-ghost btn-lg" type="button" data-tour>Ver cómo funciona</button>
+    </div>
+    <ul class="hero-datos" data-r>
+      <li><b data-cuenta="20">20</b><span>estaciones por plano de ejemplo</span></li>
+      <li><b data-cuenta="6">6</b><span>pasos por reporte</span></li>
+      <li><b>∞</b><span>servicios y constancias</span></li>
+    </ul>
+  </div>
+  <a class="bajar" href="#puntos" aria-label="Bajar"><span></span></a>
+</section>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-in">
+    <span>Reporte en 6 pasos</span><span>Constancia con QR</span><span>Modo sin internet</span><span>Stock por técnico</span>
+    <span>Portal del cliente</span><span>Pasar agenda</span><span>Calendario anual</span><span>Mapa de calor</span>
+    <span>Reporte ejecutivo</span><span>Insumos en ml, gr y pza</span>
+    <span>Reporte en 6 pasos</span><span>Constancia con QR</span><span>Modo sin internet</span><span>Stock por técnico</span>
+    <span>Portal del cliente</span><span>Pasar agenda</span><span>Calendario anual</span><span>Mapa de calor</span>
+    <span>Reporte ejecutivo</span><span>Insumos en ml, gr y pza</span>
+  </div>
+</div>
+
+<!-- ═══════════ PUNTOS DE CONTROL ═══════════ -->
+<section class="sec tall" id="puntos" data-k="puntos">
+  <div class="sticky lado-izq">
+    <div class="glass card-narr" id="card-puntos">
+      <p class="eyebrow">01 · Monitoreo</p>
+      <h2>Cada rincón del cliente, con su punto de control.</h2>
+      <p>
+        Subes el plano del cliente y colocas sus estaciones: cebaderos, trampas mecánicas, de feromona y
+        lámparas UV. El técnico las revisa una por una y todo queda registrado sobre el plano.
+      </p>
+      <ul class="leyenda" id="leyenda-puntos"></ul>
+      <p class="nota">Plano de ejemplo: restaurante con cocina, bodega, cámara fría, comedor y terraza (20 estaciones).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ MAPA DE CALOR ═══════════ -->
+<section class="sec tall" id="calor" data-k="calor">
+  <div class="sticky lado-der">
+    <div class="glass card-narr">
+      <p class="eyebrow">02 · Análisis</p>
+      <h2>Dónde está el problema, a simple vista.</h2>
+      <p>
+        Cada captura y cada consumo de cebo se suman sobre el plano real. Ves qué zona pide atención
+        antes de entrar y, en cada visita, si la actividad está bajando.
+      </p>
+      <div class="escala"><span>Sin actividad</span><i></i><span>Crítica</span></div>
+      <p class="nota">Las zonas más cálidas: lámpara UV de la línea caliente y terraza.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FLUJO DE 6 PASOS ═══════════ -->
+<section class="sec" id="flujo" data-k="flujo">
+  <div class="wrap">
+    <header class="sec-cab">
+      <p class="eyebrow" data-r>03 · En campo</p>
+      <h2 data-split>Un reporte en seis pasos. Imposible saltarse uno.</h2>
+      <p class="lead" data-r>
+        El técnico avanza en orden y la app valida cada paso en el servidor. Botones grandes, texto legible
+        y pensado para trabajar con guantes.
+      </p>
+    </header>
+    <ol class="pasos" id="pasos">
+      <svg class="pasos-linea" aria-hidden="true" preserveAspectRatio="none"><path id="linea-pasos" d=""/></svg>
+      <li class="paso" data-p="1">
+        <span class="num">1</span>
+        <h3>Cliente y visita</h3>
+        <p>Eliges la visita agendada o abres un servicio sin cita. Los datos del cliente ya están.</p>
+      </li>
+      <li class="paso" data-p="2">
+        <span class="num">2</span>
+        <h3>Diagnóstico</h3>
+        <p>Plagas detectadas, fotos del antes y la revisión de cada estación: estado, capturas, organismos y acción.</p>
+      </li>
+      <li class="paso" data-p="3">
+        <span class="num">3</span>
+        <h3>Descripción del trabajo</h3>
+        <p>Qué se hizo, horario, área tratada, equipo de protección y tiempo de reentrada.</p>
+      </li>
+      <li class="paso" data-p="4">
+        <span class="num">4</span>
+        <h3>Insumos aplicados</h3>
+        <p>Producto, lote, dosis y método. Calcula la mezcla en ml/L o g/L y descuenta el stock del técnico.</p>
+      </li>
+      <li class="paso" data-p="5">
+        <span class="num">5</span>
+        <h3>Fotos después</h3>
+        <p>Evidencia del resultado, lista para el PDF y para el portal del cliente.</p>
+      </li>
+      <li class="paso" data-p="6">
+        <span class="num">6</span>
+        <h3>Firma</h3>
+        <p>Firman el técnico y el cliente en pantalla. Se genera el PDF y la constancia con QR de verificación.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════ SIN INTERNET ═══════════ -->
+<section class="sec" id="offline" data-k="offline">
+  <div class="wrap dos-col">
+    <div class="col-texto">
+      <p class="eyebrow" data-r>04 · Sin señal</p>
+      <h2 data-split>El sótano no tiene cobertura. El reporte sí se entrega.</h2>
+      <p class="lead" data-r>
+        Con red, el teléfono guarda la agenda, los insumos y los catálogos. Sin red, el técnico llena el reporte
+        completo y queda en una cola que <strong>nunca se borra</strong> hasta que el servidor confirma.
+        Al volver la señal se envía solo, sin duplicar nada.
+      </p>
+      <p class="nota" data-r>Funciona en iPhone y Android, y se instala como app desde el navegador.</p>
+    </div>
+    <div class="col-demo" data-r>
+      <div class="tel-demo glass" id="demo-offline">
+        <div class="tel-barra">
+          <span id="off-hora">9:41</span>
+          <span class="tel-red" id="off-red"><i></i><i></i><i></i><i></i></span>
+        </div>
+        <label class="interruptor">
+          <input type="checkbox" id="off-sw">
+          <span class="pista"><span class="perilla"></span></span>
+          <span class="etq">Modo avión</span>
+        </label>
+        <div class="estado-red" id="off-estado">Conectado · todo al día</div>
+        <ul class="cola" id="off-cola"></ul>
+        <button class="btn btn-viol btn-block" id="off-nuevo" type="button">+ Capturar un reporte</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ TRES ROLES ═══════════ -->
+<section class="sec" id="roles" data-k="roles">
+  <div class="wrap">
+    <header class="sec-cab">
+      <p class="eyebrow" data-r>05 · La app</p>
+      <h2 data-split>Tres personas, una sola app.</h2>
+      <p class="lead" data-r>El administrador coordina, el técnico ejecuta y el cliente consulta. Pantallas reales, en el color de tu empresa.</p>
+    </header>
+    <div class="tabs" role="tablist" id="tabs-roles">
+      <button role="tab" class="on" data-rol="admin" type="button">Administrador</button>
+      <button role="tab" data-rol="tecnico" type="button">Técnico en campo</button>
+      <button role="tab" data-rol="cliente" type="button">Cliente</button>
+    </div>
+    <div class="coverflow" id="coverflow" aria-live="polite"></div>
+    <div class="cf-pie">
+      <button class="cf-flecha" id="cf-prev" type="button" aria-label="Anterior">‹</button>
+      <p id="cf-texto" class="cf-texto"></p>
+      <button class="cf-flecha" id="cf-next" type="button" aria-label="Siguiente">›</button>
+    </div>
+    <div class="cf-puntos" id="cf-puntos"></div>
+  </div>
+</section>
+
+<!-- ═══════════ DOCUMENTOS ═══════════ -->
+<section class="sec" id="documentos" data-k="docs">
+  <div class="wrap">
+    <header class="sec-cab">
+      <p class="eyebrow" data-r>06 · Documentos</p>
+      <h2 data-split>El PDF que tu cliente enseña con orgullo.</h2>
+      <p class="lead" data-r>
+        Cada reporte sale con tu logo y tus colores. El diseño <strong>Ejecutivo</strong> agrega resumen, tendencias,
+        mapa de calor y trazabilidad de productos. La constancia se genera sola al cerrar el servicio.
+      </p>
+    </header>
+    <div class="tabs" role="tablist" id="tabs-docs">
+      <button role="tab" class="on" data-doc="reporte" type="button">Reporte ejecutivo · 10 págs.</button>
+      <button role="tab" data-doc="constancia" type="button">Constancia de servicio · 4 págs.</button>
+    </div>
+    <div class="abanico" id="abanico"></div>
+    <div class="docs-acc">
+      <button class="btn btn-viol btn-lg" id="doc-ver" type="button">Ver el documento completo</button>
+      <a class="btn btn-ghost btn-lg" id="doc-pdf" href="pdf/reporte-ejemplo.pdf" download>Descargar PDF de ejemplo</a>
+    </div>
+    <p class="nota centro">Datos ficticios de demostración (restaurante «Casa Agave», 11 visitas en 5 meses).</p>
+  </div>
+</section>
+
+<!-- ═══════════ GRÁFICAS ═══════════ -->
+<section class="sec" id="graficas" data-k="graf">
+  <div class="wrap">
+    <header class="sec-cab">
+      <p class="eyebrow" data-r>07 · Resultados</p>
+      <h2 data-split>Demuestra que el servicio funciona. Con números.</h2>
+      <p class="lead" data-r>Las gráficas salen de lo que el técnico ya capturó: sin hojas de cálculo, sin trabajo extra.</p>
+    </header>
+    <div class="graf-grid">
+      <article class="glass graf grande" data-r>
+        <header><h3>Capturas por tipo de dispositivo</h3><p id="graf-resumen">11 visitas</p></header>
+        <div class="graf-lienzo" id="g-lineas"></div>
+        <ul class="leyenda en-linea" id="g-leyenda"></ul>
+      </article>
+      <article class="glass graf" data-r>
+        <header><h3>Gel insecticida aplicado</h3><p>gramos por visita</p></header>
+        <div class="graf-lienzo" id="g-barras-gel"></div>
+      </article>
+      <article class="glass graf" data-r>
+        <header><h3>Residual y suspensión</h3><p>mililitros por visita</p></header>
+        <div class="graf-lienzo" id="g-barras-ml"></div>
+      </article>
+      <article class="glass graf" data-r>
+        <header><h3>Plagas detectadas</h3><p>37 detecciones en 6 meses</p></header>
+        <div class="dona-caja"><div class="graf-lienzo" id="g-dona"></div><ul class="leyenda" id="g-dona-leyenda"></ul></div>
+      </article>
+      <article class="glass lectura" data-r>
+        <p class="eyebrow">Lectura automática del periodo</p>
+        <p class="lectura-txt">Las capturas pasaron de <b>150</b> a <b>94</b> a lo largo de 11 visitas: se observa una disminución.</p>
+        <p class="nota">Es una lectura descriptiva de los registros; no afirma por sí sola la eficacia del tratamiento.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PLANO INTERACTIVO ═══════════ -->
+<section class="sec" id="plano" data-k="plano">
+  <div class="wrap">
+    <header class="sec-cab">
+      <p class="eyebrow" data-r>08 · Pruébalo</p>
+      <h2 data-split>Toca una estación. Así la ve tu cliente.</h2>
+      <p class="lead" data-r>Filtra por tipo de dispositivo, mira el historial de cada punto y simula el recorrido del técnico.</p>
+    </header>
+    <div class="plano-barra" data-r>
+      <div class="filtros" id="filtros"></div>
+      <div class="plano-acc">
+        <button class="btn btn-ghost btn-sm" id="btn-calor" type="button">Mapa de calor</button>
+        <button class="btn btn-viol btn-sm" id="btn-recorrido" type="button">▶ Simular recorrido</button>
+      </div>
+    </div>
+    <div class="plano-caja" data-r>
+      <div class="tablero" id="tablero">
+        <img src="img/plano_oscuro.webp" alt="Plano de ejemplo de un restaurante con 20 estaciones de monitoreo" loading="lazy" decoding="async">
+        <svg class="ruta" id="ruta" viewBox="0 0 100 62.5" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="calor" id="calor-capa"></div>
+        <div class="pines" id="pines"></div>
+        <div class="tec" id="tec" aria-hidden="true"></div>
+      </div>
+      <aside class="glass ficha" id="ficha" aria-live="polite">
+        <p class="eyebrow">Estación</p>
+        <h3 id="f-cod">Selecciona una</h3>
+        <p id="f-tipo" class="f-tipo">Toca un punto del plano.</p>
+        <p id="f-ubic" class="f-ubic"></p>
+        <div class="f-nums">
+          <div><b id="f-ult">–</b><span>última visita</span></div>
+          <div><b id="f-tot">–</b><span>en 11 visitas</span></div>
+        </div>
+        <svg class="f-spark" id="f-spark" viewBox="0 0 220 56" preserveAspectRatio="none"></svg>
+        <p class="f-cuenta" id="f-cuenta"></p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PLANES ═══════════ -->
+<section class="sec" id="planes" data-k="planes">
+  <div class="wrap">
+    <header class="sec-cab">
+      <p class="eyebrow" data-r>09 · Planes</p>
+      <h2 data-split>Pagas por técnico. No por servicio.</h2>
+      <p class="lead" data-r>Servicios y constancias ilimitados en todos los planes. Siempre hay un administrador aparte.</p>
+    </header>
+    <div class="planes" id="planes-grid"></div>
+    <p class="nota centro" id="nota-extra"></p>
+  </div>
+</section>
+
+<!-- ═══════════ CONTACTO ═══════════ -->
+<section class="sec cta-sec" id="contacto" data-k="cta">
+  <div class="wrap cta">
+    <div class="glass cta-card" data-r>
+      <div class="cta-txt">
+        <p class="eyebrow">10 · Empecemos</p>
+        <h2>Cuéntame cómo trabajas y te lo muestro con tu caso.</h2>
+        <p class="lead">Escríbeme por WhatsApp. Te enseño la app funcionando y te digo qué plan te conviene.</p>
+        <div class="cta-botones">
+          <a class="btn btn-wa btn-lg" data-wa data-msg="Hola, quiero conocer PestOS" id="cta-wa" href="#">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.8-1c.2-.3.4-.2.6-.1l2 1c.3.1.5.2.5.3.1.2.1.8-.1 1.4Z"/></svg>
+            Escribir por WhatsApp
+          </a>
+          <span class="tel" id="cta-tel"></span>
+        </div>
+      </div>
+      <figure class="qr">
+        <div class="qr-caja"><img src="img/qr_whatsapp.svg" alt="Código QR para abrir el WhatsApp de PestOS" width="168" height="168"></div>
+        <figcaption>Escanéalo con tu celular</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="pie">
+  <div class="pie-in">
+    <a class="marca" href="#hero"><img src="img/pestos_logo.webp" alt="" width="28" height="28"><span>Pest<b>OS</b></span></a>
+    <p>Las empresas, personas y datos que aparecen (Sanitec, Casa Agave, folios, firmas y registros) son ficticios y están hechos solo para esta demostración.</p>
+  </div>
+</footer>
+
+<!-- Visor de documentos -->
+<div class="visor" id="visor" hidden role="dialog" aria-modal="true" aria-label="Visor de documento">
+  <div class="visor-barra">
+    <strong id="visor-titulo">Documento</strong>
+    <span id="visor-pag" class="visor-pag"></span>
+    <a class="btn btn-ghost btn-sm" id="visor-pdf" href="#" download>Descargar PDF</a>
+    <button class="btn btn-viol btn-sm" id="visor-x" type="button">Cerrar ✕</button>
+  </div>
+  <div class="visor-cuerpo" id="visor-cuerpo"></div>
+</div>
+
+<noscript><p style="position:fixed;bottom:0;left:0;right:0;background:#111;color:#fff;padding:10px;text-align:center;z-index:99">Activa JavaScript para ver la presentación interactiva.</p></noscript>
+<script src="vendor/driver.js.iife.js"></script>
+<script src="assets/app.js" defer></script>
+</body>
+</html>
