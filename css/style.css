@@ -79,7 +79,7 @@ h3{font-size:1.2rem;font-weight:700;line-height:1.2}
 .wrap{width:min(1180px,100%);margin:0 auto;padding:0 20px}
 .sec-cab{max-width:800px;margin:0 auto clamp(30px,6vh,60px);text-align:center}
 .sec-cab .lead{margin:20px auto 0}
-.glass{background:rgba(9,13,30,.58);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--linea);border-radius:var(--r);box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}
+.glass{background:rgba(9,13,30,.84);border:1px solid var(--linea);border-radius:var(--r);box-shadow:0 30px 80px -30px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}
 .dos-col{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,5vw,70px);align-items:center}
 
 /* ───────── Portada ───────── */
@@ -357,3 +357,34 @@ body.bloq{overflow:hidden}
 }
 
 .f-nums b{font-size:1.4rem;white-space:nowrap}
+
+/* ───────── Rendimiento ─────────
+   El desenfoque de fondo (backdrop-filter) sobre un canvas que se anima es lo más caro de pintar.
+   Se conserva solo donde el 3D se ve nítido detrás (barra, tarjetas pegadas y llamada final);
+   en el resto el 3D está atenuado y un fondo más sólido se ve igual y cuesta mucho menos. */
+.nav{-webkit-backdrop-filter:blur(12px) saturate(1.3);backdrop-filter:blur(12px) saturate(1.3)}
+.card-narr{background:rgba(9,13,30,.62);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+.cta-card{-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+.paso{background:rgba(9,13,30,.84);-webkit-backdrop-filter:none;backdrop-filter:none}
+.tabs{background:rgba(9,13,30,.84);-webkit-backdrop-filter:none;backdrop-filter:none}
+.ticker{background:rgba(5,6,12,.84);-webkit-backdrop-filter:none;backdrop-filter:none}
+.ticker-in{will-change:transform}
+.btn-ghost{background:rgba(24,30,56,.72);-webkit-backdrop-filter:none;backdrop-filter:none}
+.chip{background:rgba(18,22,44,.78);-webkit-backdrop-filter:none;backdrop-filter:none}
+.cursor-glow{mix-blend-mode:normal;background:radial-gradient(circle,rgba(139,92,246,.11),transparent 65%);will-change:transform}
+
+/* Entrada de los bloques: solo opacidad y movimiento (el filtro blur() repinta cada cuadro) */
+.js [data-r]{filter:none;transform:translateY(22px)}
+.js [data-r].vis{transition:opacity .85s cubic-bezier(.2,.8,.2,1),transform .85s cubic-bezier(.2,.8,.2,1)}
+
+/* Pines del plano: el latido usa un anillo que escala (compositor), no una sombra animada (pintura) */
+.pin{animation:none;box-shadow:0 0 14px var(--c)}
+.pin::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:2px solid var(--c);opacity:0;pointer-events:none;animation:aro 2.6s ease-out infinite;animation-delay:var(--d,0s);will-change:transform,opacity}
+@keyframes aro{0%{transform:scale(1);opacity:.75}70%,100%{transform:scale(2.4);opacity:0}}
+.pin.apagado::before{animation:none;opacity:0}
+.pin:hover,.pin.sel{box-shadow:0 0 22px var(--c),0 0 0 3px rgba(255,255,255,.3)}
+.pin.sel{box-shadow:0 0 26px var(--c),0 0 0 4px rgba(255,255,255,.35)}
+
+/* Teléfonos del carrusel: se oscurecen con una capa (opacidad) en vez de filter:brightness() */
+.fone{transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .6s}
+.fone::after{content:"";position:absolute;inset:9px;border-radius:32px;background:#000;opacity:var(--osc,0);transition:opacity .6s;pointer-events:none;z-index:4}

@@ -1,6 +1,13 @@
 // Escena 3D (Three.js): el plano del restaurante convertido en maqueta con estaciones de monitoreo.
 // El scroll mueve el objeto `estado`; el bucle de render lo suaviza y lo aplica a la cámara y a las capas.
+//
+// Rendimiento (mismo aspecto, menos trabajo):
+//  · muros y mobiliario se fusionan en una sola malla (y una sola de aristas) en vez de ~70 objetos;
+//  · haces, cabezas, aros, halos y calor son instancias (1 llamada de dibujo cada uno);
+//  · cuando el 3D está atenuado por el scroll (casi todo el recorrido) se dibuja a ~30 cuadros y a 1x;
+//  · la resolución máxima es 1.5x y el antialias solo se activa en pantallas de baja densidad.
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import datos from "./datos.js";
 import planoUrl from "../img/plano_oscuro.webp";
 
@@ -19,7 +26,7 @@ export const estado = {
   wall: 0.0, stations: 0.0, heat: 0.0, dim: 1.0, shift: 0.17, shiftY: 0.26,
 };
 
-function texturaGlow(color = "#ffffff") {
+function texturaGlow() {
   const c = document.createElement("canvas");
   c.width = c.height = 128;
   const g = c.getContext("2d");
@@ -38,15 +45,17 @@ const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const ease = (t) => 1 - Math.pow(1 - clamp(t), 3);
 
 export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
+  const dpr = window.devicePixelRatio || 1;
+  let prAlto = Math.min(dpr, 1.5);
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({
-      canvas, alpha: true, antialias: !movil, powerPreference: "high-performance",
+      canvas, alpha: true, antialias: dpr < 1.5, powerPreference: "high-performance",
     });
   } catch (e) {
     return null;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, movil ? 1.6 : 2));
+  renderer.setPixelRatio(prAlto);
   renderer.setClearColor(0x000000, 0);
 
   const scene = new THREE.Scene();
@@ -60,12 +69,13 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
   scene.add(sol);
 
   const glow = texturaGlow();
+  const dummy = new THREE.Object3D();
 
   // ---- suelo: plano holográfico + resplandor + retícula -----------------------
   const loader = new THREE.TextureLoader();
   const texPlano = loader.load(planoUrl);
   texPlano.colorSpace = THREE.SRGBColorSpace;
-  texPlano.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  texPlano.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   const suelo = new THREE.Mesh(
     new THREE.PlaneGeometry(16, 10),
     new THREE.MeshBasicMaterial({ map: texPlano, transparent: true, opacity: 0.96, toneMapped: false }),
@@ -90,9 +100,7 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
   rejilla.material.opacity = 0.45;
   plan.add(rejilla);
 
-  // ---- muros (segmentos con huecos para las puertas) --------------------------
-  const murosGrupo = new THREE.Group();
-  plan.add(murosGrupo);
+  // ---- muros: todos fusionados en una malla + una de aristas -------------------
   const matVidrio = new THREE.MeshBasicMaterial({
     color: 0x38e1ff, transparent: true, opacity: 0.1, depthWrite: false,
   });
@@ -107,18 +115,21 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
     segV(300, 520, 960), segH(300, 560, 760),
     segV(1320, 40, 470, 8), segV(1320, 560, 960, 8),
   ];
+  const murosGeo = [], murosAristas = [];
   for (const [cx, cy, w, d] of muros) {
     const g = new THREE.BoxGeometry(w * S, 1, d * S);
-    g.translate(0, 0.5, 0);
-    const m = new THREE.Mesh(g, matVidrio);
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), matBorde);
-    const grp = new THREE.Group();
-    grp.add(m, e);
-    grp.position.set(wx(cx), 0, wz(cy));
-    murosGrupo.add(grp);
+    g.translate(wx(cx), 0.5, wz(cy));
+    murosGeo.push(g);
+    murosAristas.push(new THREE.EdgesGeometry(g));
   }
+  const murosGrupo = new THREE.Group();
+  murosGrupo.add(
+    new THREE.Mesh(mergeGeometries(murosGeo), matVidrio),
+    new THREE.LineSegments(mergeGeometries(murosAristas), matBorde),
+  );
+  plan.add(murosGrupo);
 
-  // ---- mobiliario extruido ------------------------------------------------------
+  // ---- mobiliario extruido (una malla con color por vértice) ---------------------
   const mobGrupo = new THREE.Group();
   plan.add(mobGrupo);
   const cajas = [   // [x1, y1, x2, y2, alto, color]
@@ -134,16 +145,34 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
     [80, 740, 260, 778, 0.5, 0x3a3f86], [80, 800, 260, 838, 0.5, 0x3a3f86],
     [1180, 906, 1260, 946, 0.2, 0x7a4a2a],
   ];
+  const mobGeo = [], mobAristas = [];
   for (const [x1, y1, x2, y2, h, col] of cajas) {
     const g = new THREE.BoxGeometry((x2 - x1) * S, h, (y2 - y1) * S);
-    g.translate(0, h / 2, 0);
-    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: col, emissive: col, emissiveIntensity: 0.25 }));
-    m.position.set(wx((x1 + x2) / 2), 0, wz((y1 + y2) / 2));
-    mobGrupo.add(m);
-    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color: 0x6aa8ff, transparent: true, opacity: 0.35 }));
-    e.position.copy(m.position);
-    mobGrupo.add(e);
+    g.translate(wx((x1 + x2) / 2), h / 2, wz((y1 + y2) / 2));
+    const c = new THREE.Color(col);
+    const n = g.attributes.position.count;
+    const arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) arr.set([c.r, c.g, c.b], i * 3);
+    g.setAttribute("color", new THREE.BufferAttribute(arr, 3));
+    mobGeo.push(g);
+    mobAristas.push(new THREE.EdgesGeometry(g));
   }
+  const matMob = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // Mismo resultado que `emissive = color * 0.25` por caja, pero con una sola malla.
+  matMob.onBeforeCompile = (sh) => {
+    sh.fragmentShader = sh.fragmentShader.replace(
+      "#include <emissivemap_fragment>",
+      "#include <emissivemap_fragment>\n totalEmissiveRadiance += diffuseColor.rgb * 0.25;",
+    );
+  };
+  mobGrupo.add(
+    new THREE.Mesh(mergeGeometries(mobGeo), matMob),
+    new THREE.LineSegments(
+      mergeGeometries(mobAristas),
+      new THREE.LineBasicMaterial({ color: 0x6aa8ff, transparent: true, opacity: 0.35 }),
+    ),
+  );
+
   const mesasRedondas = [];
   for (const y of [330, 450, 570, 690]) for (const x of [650, 790, 930, 1070, 1210]) mesasRedondas.push([x, y]);
   mesasRedondas.push([1440, 150], [1440, 340], [1440, 440], [1400, 640], [1500, 760]);
@@ -153,71 +182,108 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
     geoMesa, new THREE.MeshLambertMaterial({ color: 0x24357f, emissive: 0x1b2566, emissiveIntensity: 0.45 }),
     mesasRedondas.length,
   );
-  const mtx = new THREE.Matrix4();
   mesasRedondas.forEach(([x, y], i) => {
-    mtx.makeTranslation(wx(x), 0, wz(y));
-    mesas.setMatrixAt(i, mtx);
+    dummy.position.set(wx(x), 0, wz(y));
+    dummy.rotation.set(0, 0, 0);
+    dummy.scale.set(1, 1, 1);
+    dummy.updateMatrix();
+    mesas.setMatrixAt(i, dummy.matrix);
   });
+  mesas.frustumCulled = false;
   mobGrupo.add(mesas);
 
-  // ---- estaciones de monitoreo -----------------------------------------------------
-  const estGrupo = new THREE.Group();
-  plan.add(estGrupo);
+  // ---- estaciones de monitoreo (instanciadas) ---------------------------------------
   const lista = [...datos.estaciones].sort((a, b) => ORDEN.indexOf(a.grupo) - ORDEN.indexOf(b.grupo));
-  const pines = lista.map((e, i) => {
-    const col = new THREE.Color(COLORES[e.grupo]);
-    const g = new THREE.Group();
-    g.position.set(wx(e.x * datos.w / 100), 0, wz(e.y * datos.h / 100));
-    const haz = new THREE.CylinderGeometry(0.02, 0.02, 1.35, 6);
-    haz.translate(0, 0.675, 0);
-    g.add(new THREE.Mesh(haz, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.85 })));
-    const cabeza = new THREE.Mesh(new THREE.SphereGeometry(0.15, 20, 20), new THREE.MeshBasicMaterial({ color: col }));
-    cabeza.position.y = 1.35;
-    g.add(cabeza);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: glow, color: col, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
-    }));
-    halo.position.y = 1.35;
-    halo.scale.setScalar(1.25);
-    g.add(halo);
-    const aro = new THREE.Mesh(
-      new THREE.RingGeometry(0.12, 0.17, 40),
-      new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }),
-    );
-    aro.rotation.x = -Math.PI / 2;
-    aro.position.y = 0.03;
-    g.add(aro);
-    estGrupo.add(g);
-    const ultima = e.serie[e.serie.length - 1];
-    return { g, halo, aro, cabeza, i, e, fase: Math.random(), actividad: clamp(ultima / 30) };
-  });
+  const N = lista.length;
+  const P = lista.map((e) => ({
+    cod: e.cod,
+    x: wx(e.x * datos.w / 100),
+    z: wz(e.y * datos.h / 100),
+    col: new THREE.Color(COLORES[e.grupo]),
+    fase: Math.random(),
+    act: clamp(e.serie[e.serie.length - 1] / 30),
+  }));
+  const idxPorCod = Object.fromEntries(P.map((p, i) => [p.cod, i]));
 
-  // ---- mapa de calor sobre el suelo ------------------------------------------------
-  const calorGrupo = new THREE.Group();
-  plan.add(calorGrupo);
+  const geoHaz = new THREE.CylinderGeometry(0.02, 0.02, 1.35, 6);
+  geoHaz.translate(0, 0.675, 0);
+  const haces = new THREE.InstancedMesh(geoHaz, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.85 }), N);
+  const cabezas = new THREE.InstancedMesh(new THREE.SphereGeometry(0.15, 14, 10), new THREE.MeshBasicMaterial(), N);
+  const aros = new THREE.InstancedMesh(
+    new THREE.RingGeometry(0.12, 0.17, 32),
+    new THREE.MeshBasicMaterial({ transparent: true, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
+    N,
+  );
+  const matHalo = new THREE.ShaderMaterial({
+    uniforms: { mapa: { value: glow } },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `
+      varying vec2 vUv; varying vec3 vCol;
+      void main() {
+        vUv = uv;
+        vCol = instanceColor;
+        vec4 c = modelViewMatrix * instanceMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+        float s = length(instanceMatrix[0].xyz);
+        c.xy += position.xy * s;
+        gl_Position = projectionMatrix * c;
+      }`,
+    fragmentShader: `
+      uniform sampler2D mapa; varying vec2 vUv; varying vec3 vCol;
+      void main() {
+        vec4 t = texture2D(mapa, vUv);
+        gl_FragColor = vec4(vCol, t.a);
+        #include <colorspace_fragment>
+      }`,
+  });
+  const halos = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), matHalo, N);
+  P.forEach((p, i) => {
+    haces.setColorAt(i, p.col);
+    cabezas.setColorAt(i, p.col);
+    halos.setColorAt(i, p.col);
+    aros.setColorAt(i, p.col);
+  });
+  const estGrupo = new THREE.Group();
+  for (const m of [haces, cabezas, aros, halos]) {
+    m.frustumCulled = false;
+    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    estGrupo.add(m);
+  }
+  aros.instanceColor.setUsage(THREE.DynamicDrawUsage);
+  plan.add(estGrupo);
+
+  // ---- mapa de calor sobre el suelo (instanciado) ------------------------------------
   const calores = [];
   for (const e of datos.estaciones) {
     const ultima = e.serie[e.serie.length - 1];
     if (!ultima) continue;
     const v = e.grupo === "cebaderos" ? 8 : ultima;
-    const r = 0.45 + Math.sqrt(v) * 0.13;
     const t = clamp(v / 36);
-    const col = new THREE.Color().setHSL(0.13 - t * 0.13, 1, 0.5);   // amarillo -> rojo
-    const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(r * 2, r * 2),
-      new THREE.MeshBasicMaterial({
-        map: glow, color: col, transparent: true, opacity: 0,
-        blending: THREE.AdditiveBlending, depthWrite: false,
-      }),
-    );
-    m.rotation.x = -Math.PI / 2;
-    m.position.set(wx(e.x * datos.w / 100), 0.04, wz(e.y * datos.h / 100));
-    calorGrupo.add(m);
-    calores.push(m);
+    calores.push({
+      x: wx(e.x * datos.w / 100), z: wz(e.y * datos.h / 100),
+      r: 0.45 + Math.sqrt(v) * 0.13,
+      col: new THREE.Color().setHSL(0.13 - t * 0.13, 1, 0.5),    // amarillo -> rojo
+    });
   }
+  const calor = new THREE.InstancedMesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ map: glow, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+    calores.length,
+  );
+  calores.forEach((c, i) => {
+    dummy.position.set(c.x, 0.04, c.z);
+    dummy.rotation.set(-Math.PI / 2, 0, 0);
+    dummy.scale.setScalar(c.r * 2);
+    dummy.updateMatrix();
+    calor.setMatrixAt(i, dummy.matrix);
+    calor.setColorAt(i, c.col);
+  });
+  calor.instanceColor.setUsage(THREE.DynamicDrawUsage);
+  calor.frustumCulled = false;
+  calor.visible = false;
+  plan.add(calor);
 
   // ---- partículas flotantes ------------------------------------------------------------
-  const nPart = movil ? 160 : 420;
+  const nPart = movil ? 140 : 340;
   const pos = new Float32Array(nPart * 3);
   const col = new Float32Array(nPart * 3);
   const paleta = Object.values(COLORES).map((c) => new THREE.Color(c));
@@ -235,17 +301,29 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
     size: 0.09, map: glow, vertexColors: true, transparent: true, opacity: 0.85,
     blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
   }));
+  particulas.frustumCulled = false;
   scene.add(particulas);
+
+  // Objetos estáticos: sin recalcular su matriz en cada cuadro
+  for (const o of [suelo, aura, rejilla]) { o.updateMatrix(); o.matrixAutoUpdate = false; }
 
   // ---- bucle ----------------------------------------------------------------------------------
   const cur = { ...estado };
   const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
-  let ancho = 1, alto = 1, destacada = null, corriendo = true, ultimo = performance.now(), t = 0;
+  let ancho = 1, alto = 1, destacada = -1, corriendo = true, ultimo = performance.now(), t = 0;
   let nivel = 0, acumDt = 0, cuadros = 0;     // calidad adaptable: baja sola si el equipo va lento
+  let prActual = prAlto, opacidadPuesta = -1;
 
+  function fijarResolucion(pr) {
+    if (pr === prActual) return;
+    prActual = pr;
+    renderer.setPixelRatio(pr);
+    renderer.setSize(ancho, alto, false);
+  }
   function redimensionar() {
     ancho = canvas.clientWidth || window.innerWidth;
     alto = canvas.clientHeight || window.innerHeight;
+    renderer.setPixelRatio(prActual);
     renderer.setSize(ancho, alto, false);
     camera.aspect = ancho / alto;
     camera.updateProjectionMatrix();
@@ -265,11 +343,22 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
   function frame(ahora) {
     if (!corriendo) return;
     requestAnimationFrame(frame);
+    const atenuado = cur.dim < 0.4;
+    // Con el 3D atenuado (casi todo el recorrido) basta con ~30 cuadros por segundo
+    if (atenuado && ahora - ultimo < 30) return;
     const dt = Math.min(0.05, (ahora - ultimo) / 1000);
     ultimo = ahora;
     t += dt;
     const k = 1 - Math.exp(-dt * 3.2);
     for (const key of Object.keys(estado)) cur[key] += (estado[key] - cur[key]) * k;
+
+    // invisible por completo: no se actualiza ni se dibuja nada
+    if (cur.dim <= 0.02) return;
+
+    // resolución: completa si se ve bien, 1x si está atenuado (histéresis para no parpadear)
+    if (atenuado) fijarResolucion(1);
+    else if (cur.dim > 0.55) fijarResolucion(nivel >= 1 ? 1 : prAlto);
+
     mouse.sx += (mouse.x - mouse.sx) * 0.05;
     mouse.sy += (mouse.y - mouse.sy) * 0.05;
 
@@ -293,51 +382,90 @@ export function crearEscena(canvas, { movil = false, reducir = false } = {}) {
     else camera.clearViewOffset();
 
     // altura de muros y mobiliario
-    const h = Math.max(0.001, cur.wall);
-    murosGrupo.children.forEach((c) => (c.scale.y = h * 0.62));
+    murosGrupo.scale.y = Math.max(0.001, cur.wall) * 0.62;
     mobGrupo.scale.y = Math.max(0.001, cur.wall);
 
     // estaciones: aparecen una a una
-    const n = pines.length;
-    for (const p of pines) {
-      const s = ease(cur.stations * (n + 3) - p.i);
-      p.g.visible = s > 0.001;
-      p.g.scale.set(1, Math.max(0.001, s), 1);
-      const fase = (t * (0.5 + p.actividad * 0.9) + p.fase) % 1;
-      const reforzada = destacada === p.e.cod ? 1.9 : 1;
-      p.aro.scale.setScalar((0.6 + fase * (2.2 + p.actividad * 2.2)) * reforzada);
-      p.aro.material.opacity = (1 - fase) * 0.9 * s;
-      p.halo.scale.setScalar((1.15 + Math.sin(t * 3 + p.i) * 0.1 + p.actividad * 0.6) * reforzada);
+    for (let i = 0; i < N; i++) {
+      const p = P[i];
+      const s = ease(cur.stations * (N + 3) - i);
+      const vis = s > 0.001;
+      const sc = Math.max(0.001, s);
+      const fase = (t * (0.5 + p.act * 0.9) + p.fase) % 1;
+      const ref = destacada === i ? 1.9 : 1;
+
+      dummy.rotation.set(0, 0, 0);
+      dummy.position.set(p.x, 0, p.z);
+      dummy.scale.set(1, sc, 1);
+      dummy.updateMatrix();
+      haces.setMatrixAt(i, dummy.matrix);
+
+      dummy.position.set(p.x, 1.35 * sc, p.z);
+      dummy.updateMatrix();
+      cabezas.setMatrixAt(i, dummy.matrix);
+
+      const hs = vis ? (1.15 + Math.sin(t * 3 + i) * 0.1 + p.act * 0.6) * ref : 0.0001;
+      dummy.scale.setScalar(hs);
+      dummy.updateMatrix();
+      halos.setMatrixAt(i, dummy.matrix);
+
+      dummy.rotation.set(-Math.PI / 2, 0, 0);
+      dummy.position.set(p.x, 0.03, p.z);
+      dummy.scale.setScalar(vis ? (0.6 + fase * (2.2 + p.act * 2.2)) * ref : 0.0001);
+      dummy.updateMatrix();
+      aros.setMatrixAt(i, dummy.matrix);
+      const a = (1 - fase) * 0.9 * s;
+      const ac = aros.instanceColor.array;
+      ac[i * 3] = p.col.r * a; ac[i * 3 + 1] = p.col.g * a; ac[i * 3 + 2] = p.col.b * a;
     }
+    // solo se dibujan las estaciones ya reveladas (aparecen en orden: son un prefijo de la lista)
+    const visibles = Math.min(N, Math.max(0, Math.ceil(cur.stations * (N + 3))));
+    haces.count = cabezas.count = halos.count = aros.count = visibles;
+    haces.instanceMatrix.needsUpdate = true;
+    cabezas.instanceMatrix.needsUpdate = true;
+    halos.instanceMatrix.needsUpdate = true;
+    aros.instanceMatrix.needsUpdate = true;
+    aros.instanceColor.needsUpdate = true;
 
     // calor
-    calores.forEach((m, i) => {
-      m.material.opacity = cur.heat * (0.62 + Math.sin(t * 1.4 + i) * 0.1);
-      m.visible = cur.heat > 0.01;
-    });
+    const hayCalor = cur.heat > 0.01;
+    calor.visible = hayCalor;
+    if (hayCalor) {
+      const cc = calor.instanceColor.array;
+      for (let i = 0; i < calores.length; i++) {
+        const kk = cur.heat * (0.62 + Math.sin(t * 1.4 + i) * 0.1);
+        const c = calores[i].col;
+        cc[i * 3] = c.r * kk; cc[i * 3 + 1] = c.g * kk; cc[i * 3 + 2] = c.b * kk;
+      }
+      calor.instanceColor.needsUpdate = true;
+    }
 
     acumDt += dt; cuadros += 1;
     if (cuadros >= 45) {
       const medio = acumDt / cuadros;
       acumDt = 0; cuadros = 0;
-      if (medio > 0.045 && nivel < 2 && t > 2) {
+      if (medio > 0.045 && nivel < 2 && t > 2 && !atenuado) {
         nivel += 1;
-        if (nivel === 1) { renderer.setPixelRatio(1); renderer.setSize(ancho, alto, false); }
+        if (nivel === 1) { prAlto = 1; fijarResolucion(1); }
         if (nivel === 2) { particulas.visible = false; aura.visible = false; rejilla.visible = false; }
       }
     }
-    particulas.rotation.y = t * 0.012;
-    particulas.position.y = Math.sin(t * 0.25) * 0.15;
+    if (!atenuado) {
+      particulas.rotation.y = t * 0.012;
+      particulas.position.y = Math.sin(t * 0.25) * 0.15;
+    }
     aura.material.opacity = 0.35 + 0.2 * (1 - cur.heat);
 
-    canvas.style.opacity = String(clamp(cur.dim, 0, 1));
-    if (cur.dim > 0.02) renderer.render(scene, camera);
+    const op = clamp(cur.dim, 0, 1);
+    if (Math.abs(op - opacidadPuesta) > 0.003) { canvas.style.opacity = String(op); opacidadPuesta = op; }
+    renderer.render(scene, camera);
   }
   requestAnimationFrame(frame);
 
   return {
     estado,
-    resaltar(cod) { destacada = cod; },
+    resaltar(cod) { destacada = cod in idxPorCod ? idxPorCod[cod] : -1; },
     liberar() { corriendo = false; renderer.dispose(); },
+    info: renderer.info,
   };
 }

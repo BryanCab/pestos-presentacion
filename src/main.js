@@ -79,7 +79,7 @@ if (escena) {
   const tween = (desde, hasta, trigger, start, end) =>
     gsap.fromTo(estado, { ...desde }, {
       ...hasta, ease: "none", immediateRender: false,
-      scrollTrigger: { trigger, start, end, scrub: 1.1 },
+      scrollTrigger: { trigger, start, end, scrub: true },   // el suavizado lo hace el bucle del 3D
     });
 
   SECCIONES.forEach((sec, i) => {
@@ -111,9 +111,16 @@ addEventListener("scroll", () => {
 
 if (!tactil) {
   const glow = $("#cursor");
+  let gx = 0, gy = 0, gPendiente = false;
   addEventListener("pointermove", (e) => {
-    glow.style.opacity = 1;
-    glow.style.transform = `translate(${e.clientX}px,${e.clientY}px)`;
+    gx = e.clientX; gy = e.clientY;
+    if (gPendiente) return;
+    gPendiente = true;
+    requestAnimationFrame(() => {
+      gPendiente = false;
+      glow.style.opacity = 1;
+      glow.style.transform = `translate3d(${gx}px,${gy}px,0)`;
+    });
   }, { passive: true });
 }
 
@@ -329,7 +336,7 @@ $$(".paso").forEach((p, i) => {
       f.style.transform = `translateX(${o * paso}px) translateZ(${-a * 150}px) rotateY(${-o * 30}deg) scale(${1 - a * 0.05})`;
       f.style.opacity = a > 2 ? 0 : 1 - a * 0.2;
       f.style.zIndex = 50 - a;
-      f.style.filter = a === 0 ? "none" : `brightness(${1 - a * 0.22})`;
+      f.style.setProperty("--osc", a === 0 ? "0" : String(Math.min(0.6, a * 0.22)));
       f.style.pointerEvents = a > 2 ? "none" : "auto";
     });
     $$("i", puntos).forEach((d, i) => d.classList.toggle("on", i === idx));
@@ -386,9 +393,11 @@ $$(".paso").forEach((p, i) => {
   const ab = $("#abanico");
   let doc = "reporte", hojas = [], spread = reducir ? 1 : 0.15;
 
+  let anchoHoja = 300;                       // medido una vez (leer offsetWidth en cada scroll fuerza recálculo de layout)
+  const medirHoja = () => { anchoHoja = hojas[0]?.offsetWidth || anchoHoja; };
   function layout() {
     const n = hojas.length, mid = (n - 1) / 2;
-    const w = hojas[0]?.offsetWidth || 300;
+    const w = anchoHoja;
     hojas.forEach((h, i) => {
       const o = i - mid;
       const x = o * w * (movil() ? 0.34 : 0.5) * spread;
@@ -411,6 +420,7 @@ $$(".paso").forEach((p, i) => {
       ab.append(h);
       return h;
     });
+    medirHoja();
     layout();
     $("#doc-pdf").href = d.pdf;
     $("#doc-pdf").setAttribute("download", d.pdf.split("/").pop());
@@ -428,10 +438,10 @@ $$(".paso").forEach((p, i) => {
   }));
   dibujar();
   ScrollTrigger.create({
-    trigger: ab, start: "top 90%", end: "center 45%", scrub: reducir ? false : 0.9,
+    trigger: ab, start: "top 90%", end: "center 45%", scrub: !reducir,
     onUpdate: (s) => { spread = reducir ? 1 : 0.12 + s.progress * 0.88; layout(); },
   });
-  addEventListener("resize", layout);
+  addEventListener("resize", () => { medirHoja(); layout(); });
 
   // visor a pantalla completa
   const visor = $("#visor"), cuerpo = $("#visor-cuerpo"), pag = $("#visor-pag");
@@ -872,4 +882,4 @@ if (!leer("pestos_tarjeta_tour")) {
 }
 
 addEventListener("load", () => ScrollTrigger.refresh());
-window.__pestos = { estado, K, ScrollTrigger };
+window.__pestos = { estado, K, ScrollTrigger, escena };
